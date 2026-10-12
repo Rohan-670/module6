@@ -1,0 +1,33 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-local_root_change_me}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-commercesphere}
+      MYSQL_USER: ${MYSQL_USER:-commerce_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local_db_change_me}
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    ports:
+      - "3306:3306"
+    volumes:
+      - commerce-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  app:
+    build: .
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      PORT: 8080
+      DB_URL: ${DB_URL:-jdbc:mysql://mysql:3306/commercesphere?createDatabaseIfNotExist=true&serverTimezone=UTC}
+      DB_USERNAME: ${DB_USERNAME:-commerce_user}
+      DB_PASSWORD: ${DB_PASSWORD:-local_db_change_me}
+    ports:
+      - "8080:8080"
+volumes:
+  commerce-mysql-data:

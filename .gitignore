@@ -1,0 +1,12 @@
+# Maven / Java
+target/
+*.class
+*.log
+.idea/
+.vscode/
+*.iml
+# Local secrets and generated data
+.env
+*.mv.db
+*.trace.db
+.DS_Store
